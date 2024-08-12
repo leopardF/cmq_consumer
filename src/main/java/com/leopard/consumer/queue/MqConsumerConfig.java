@@ -1,12 +1,9 @@
 package com.leopard.consumer.queue;
 
-import com.qcloud.cmq.client.common.ClientConfig;
-import com.qcloud.cmq.client.consumer.Consumer;
-import com.qcloud.cmq.client.consumer.DeleteResult;
-import com.qcloud.cmq.client.exception.MQClientException;
-import com.qcloud.cmq.client.exception.MQServerException;
 import com.leopard.consumer.service.InterfaceLogService;
+import com.qcloud.cmq.Account;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,23 +17,20 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class MqConsumerConfig {
 
-    static Consumer consumer = new Consumer();
+    /**
+     * 账号是否开放标识
+     */
+    public static boolean OPEN_ACCOUNT = false;
+    static Account account = null;
+
     @Value("${mq.tencent.nameServerAddress}")
     private String nameServerAddress;
+
     @Value("${mq.tencent.secretId}")
     private String secretId;
+
     @Value("${mq.tencent.secretKey}")
     private String secretKey;
-    @Value("${mq.tencent.batchPullNumber}")
-    private int batchPullNumber;
-    @Value("${mq.tencent.retryTimesWhenSendFailed}")
-    private int retryTimesWhenSendFailed;
-    @Value("${mq.tencent.pullWaitSeconds}")
-    private int pollingWaitSeconds;
-    @Value("${mq.tencent.requestTimeoutMs}")
-    private int requestTimeoutMs;
-    @Value("${mq.send.queue}")
-    private String queueString;
 
     @Autowired
     private InterfaceLogService interfaceLogService;
@@ -44,29 +38,17 @@ public class MqConsumerConfig {
     @PostConstruct
     public void init() {
 
-        consumer.setNameServerAddress(nameServerAddress);
-        consumer.setAppId(secretId);
-        consumer.setUin(secretKey);
-        consumer.setSignMethod(ClientConfig.SIGN_METHOD_SHA256);
-        consumer.setBatchPullNumber(batchPullNumber);
-        consumer.setRetryTimesWhenSendFailed(retryTimesWhenSendFailed);
-        consumer.setPollingWaitSeconds(pollingWaitSeconds);
-        consumer.setRequestTimeoutMS(requestTimeoutMs);
-
-        try {
-            //启动消费者
-            consumer.start();
-            log.info(" consumer start Success ! ");
-            //启动监听者监听队列
-            consumer.subscribe(queueString, new ConsumerMsgListener());
-            log.info(" consumer - subscribe start Success ! ");
-        } catch (MQClientException e) {
-            e.printStackTrace();
-            log.info(" consumer start Fail ! {}", e);
-        } catch (MQServerException e) {
-            e.printStackTrace();
-            log.info(" consumer - subscribe start Fail ! {}", e);
+        if (StringUtils.isNotBlank(nameServerAddress)
+                && StringUtils.isNotBlank(secretId)
+                && StringUtils.isNotBlank(secretKey)) {
+            OPEN_ACCOUNT = true;
         }
+        if (!OPEN_ACCOUNT) {
+            log.error(" account info not config ! ");
+            return;
+        }
+        //启动链接配置
+        account = new Account(nameServerAddress, secretId, secretKey);
         MqConsumerConfig.getInstance().interfaceLogService = this.interfaceLogService;
     }
 
@@ -96,7 +78,8 @@ public class MqConsumerConfig {
      *
      * @param receiptHandle
      */
-    public void deleteMsg(long receiptHandle) {
+//    @Deprecated
+    /*public void deleteMsg(long receiptHandle) {
 
         try {
             // 同步确认消息
@@ -111,5 +94,5 @@ public class MqConsumerConfig {
             e.printStackTrace();
             log.info(" DeleteResult - del start Fail ! {}", e);
         }
-    }
+    }*/
 }

@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.leopard</groupId>
             <artifactId>leopard_utils</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.17</version>
         </dependency>
 
     </dependencies>

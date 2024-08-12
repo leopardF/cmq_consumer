@@ -13,10 +13,6 @@ mq:
     nameServerAddress: http://127.0.0.1
     secretId: 10000
     secretKey: 1377
-    batchPullNumber: 16 #批量拉取时最大拉取消息数量，范围为1-16
-    retryTimesWhenSendFailed: 1 #参数为0，即出现内部方法出现异常不会重试
-    pullWaitSeconds: 1 #设置队列长轮询时间
-    requestTimeoutMs: 5000 #设置请求超时时间，如果设置了没有消息时等待时间为6s，超时时间为5000ms，则最终超时时间为(6*1000+5000)ms
   send:
     queue: QUEUE_XXX
-    topic: TOPIC_XXX
+    topic: TOPIC_XXX #暂时没使用
